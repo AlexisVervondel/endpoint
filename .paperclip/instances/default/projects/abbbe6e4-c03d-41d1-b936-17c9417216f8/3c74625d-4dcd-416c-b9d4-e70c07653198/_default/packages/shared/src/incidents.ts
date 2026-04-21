@@ -46,7 +46,6 @@ export interface UpdateIncidentBody {
 }
 
 export interface AddTimelineEntryBody {
-  authorId: string
   message: string
   eventType?: IncidentTimeline['eventType']
 }

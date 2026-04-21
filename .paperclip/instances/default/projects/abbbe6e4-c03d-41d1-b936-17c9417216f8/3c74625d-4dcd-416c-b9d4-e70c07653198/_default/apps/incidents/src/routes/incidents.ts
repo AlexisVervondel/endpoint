@@ -22,8 +22,8 @@ export const incidentsRoutes: FastifyPluginAsync = async (fastify) => {
       .from(incidents)
       .where(conditions.length ? and(...conditions) : undefined)
       .orderBy(desc(incidents.createdAt))
-      .limit(Number(limit))
-      .offset(Number(offset))
+      .limit(Math.min(Math.max(1, Number(limit) || 50), 200))
+      .offset(Math.max(0, Number(offset) || 0))
 
     return rows
   })
@@ -75,7 +75,7 @@ export const incidentsRoutes: FastifyPluginAsync = async (fastify) => {
       eventType: 'system',
     })
 
-    await writeAuditLog('system', 'incident.created', 'incident', incident!.id, null, incident, request)
+    await writeAuditLog(request.user.sub, 'incident.created', 'incident', incident!.id, null, incident, request)
 
     // Slack notify
     await notifySlack('opened', {
@@ -158,7 +158,7 @@ export const incidentsRoutes: FastifyPluginAsync = async (fastify) => {
       .where(eq(incidents.id, request.params.id))
       .returning()
 
-    await writeAuditLog('system', 'incident.updated', 'incident', before.id, before, after, request)
+    await writeAuditLog(request.user.sub, 'incident.updated', 'incident', before.id, before, after, request)
 
     // Slack notify on close/escalation
     if (body.status === 'closed') {

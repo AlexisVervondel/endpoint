@@ -9,17 +9,30 @@ const SEVERITIES: IncidentSeverity[] = ['SEV1', 'SEV2', 'SEV3', 'SEV4']
 export const reportsRoutes: FastifyPluginAsync = async (fastify) => {
   const db = getDb()
 
+  const MAX_PERIOD_MS = 366 * 24 * 60 * 60 * 1000 // 1 year max
+
   function parsePeriod(query: Record<string, string>) {
     const end = query['periodEnd'] ? new Date(query['periodEnd']) : new Date()
-    const start = query['periodStart']
-      ? new Date(query['periodStart'])
-      : new Date(end.getTime() - 30 * 24 * 60 * 60 * 1000)
-    return { start, end }
+    if (isNaN(end.getTime())) throw new Error('Invalid periodEnd date')
+
+    const defaultStart = new Date(end.getTime() - 30 * 24 * 60 * 60 * 1000)
+    const start = query['periodStart'] ? new Date(query['periodStart']) : defaultStart
+    if (isNaN(start.getTime())) throw new Error('Invalid periodStart date')
+    if (start >= end) throw new Error('periodStart must be before periodEnd')
+
+    // Cap range to prevent DB exhaustion on unbounded queries
+    const clampedStart = new Date(Math.max(start.getTime(), end.getTime() - MAX_PERIOD_MS))
+    return { start: clampedStart, end }
   }
 
   // GET /api/reports/mttr
-  fastify.get('/mttr', async (request) => {
-    const { start, end } = parsePeriod(request.query as Record<string, string>)
+  fastify.get('/mttr', async (request, reply) => {
+    let start: Date, end: Date
+    try {
+      ;({ start, end } = parsePeriod(request.query as Record<string, string>))
+    } catch (err) {
+      return reply.status(400).send({ error: (err as Error).message })
+    }
 
     const rows = await db
       .select()
@@ -64,8 +77,13 @@ export const reportsRoutes: FastifyPluginAsync = async (fastify) => {
   })
 
   // GET /api/reports/sla
-  fastify.get('/sla', async (request) => {
-    const { start, end } = parsePeriod(request.query as Record<string, string>)
+  fastify.get('/sla', async (request, reply) => {
+    let start: Date, end: Date
+    try {
+      ;({ start, end } = parsePeriod(request.query as Record<string, string>))
+    } catch (err) {
+      return reply.status(400).send({ error: (err as Error).message })
+    }
 
     const rows = await db
       .select()

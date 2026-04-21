@@ -35,7 +35,6 @@ export interface PostmortemActionItem {
 }
 
 export interface CreatePostmortemBody {
-  authorId: string
   summary: string
   timeline: string
   rootCause: string

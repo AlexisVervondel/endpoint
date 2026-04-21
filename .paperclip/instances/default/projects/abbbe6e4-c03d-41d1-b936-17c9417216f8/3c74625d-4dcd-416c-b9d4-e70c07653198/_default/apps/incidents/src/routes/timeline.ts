@@ -26,10 +26,9 @@ export const timelineRoutes: FastifyPluginAsync = async (fastify) => {
     schema: {
       body: {
         type: 'object',
-        required: ['authorId', 'message'],
+        required: ['message'],
         properties: {
-          authorId: { type: 'string', minLength: 1 },
-          message: { type: 'string', minLength: 1 },
+          message: { type: 'string', minLength: 1, maxLength: 5000 },
           eventType: {
             type: 'string',
             enum: ['comment', 'status_change', 'severity_change', 'escalation', 'system'],
@@ -41,17 +40,20 @@ export const timelineRoutes: FastifyPluginAsync = async (fastify) => {
     const [incident] = await db.select({ id: incidents.id }).from(incidents).where(eq(incidents.id, request.params.id))
     if (!incident) return reply.status(404).send({ error: 'Incident not found' })
 
+    // authorId is always the authenticated caller — never client-supplied
+    const authorId = request.user.sub
+
     const [entry] = await db
       .insert(incidentTimeline)
       .values({
         incidentId: request.params.id,
-        authorId: request.body.authorId,
+        authorId,
         message: request.body.message,
         eventType: request.body.eventType ?? 'comment',
       })
       .returning()
 
-    await writeAuditLog(request.body.authorId, 'timeline.entry_added', 'incident', request.params.id, null, entry, request)
+    await writeAuditLog(authorId, 'timeline.entry_added', 'incident', request.params.id, null, entry, request)
 
     return reply.status(201).send(entry)
   })

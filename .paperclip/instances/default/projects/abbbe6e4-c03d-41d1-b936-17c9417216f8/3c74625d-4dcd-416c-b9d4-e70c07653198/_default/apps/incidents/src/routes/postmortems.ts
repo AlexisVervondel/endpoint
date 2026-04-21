@@ -10,7 +10,6 @@ export const postmortemRoutes: FastifyPluginAsync = async (fastify) => {
   const postmortemBodySchema = {
     type: 'object',
     properties: {
-      authorId: { type: 'string' },
       summary: { type: 'string' },
       timeline: { type: 'string' },
       rootCause: { type: 'string' },
@@ -43,7 +42,7 @@ export const postmortemRoutes: FastifyPluginAsync = async (fastify) => {
       body: {
         ...postmortemBodySchema,
         required: [
-          'authorId', 'summary', 'timeline', 'rootCause', 'contributingFactors',
+          'summary', 'timeline', 'rootCause', 'contributingFactors',
           'impactSummary', 'dataExposed', 'mitigationSteps', 'resolutionSteps',
           'lessonsLearned', 'evidenceCollected', 'notificationsSent',
         ],
@@ -58,11 +57,14 @@ export const postmortemRoutes: FastifyPluginAsync = async (fastify) => {
     if (existing) return reply.status(409).send({ error: 'Postmortem already exists, use PATCH to update' })
 
     const body = request.body
+    // authorId is always the authenticated caller
+    const authorId = request.user.sub
+
     const [pm] = await db
       .insert(postmortems)
       .values({
         incidentId: request.params.id,
-        authorId: body.authorId,
+        authorId,
         summary: body.summary,
         timeline: body.timeline,
         rootCause: body.rootCause,
@@ -79,7 +81,7 @@ export const postmortemRoutes: FastifyPluginAsync = async (fastify) => {
       })
       .returning()
 
-    await writeAuditLog(body.authorId, 'postmortem.created', 'incident', request.params.id, null, pm, request)
+    await writeAuditLog(authorId, 'postmortem.created', 'incident', request.params.id, null, pm, request)
 
     return reply.status(201).send(pm)
   })
@@ -117,7 +119,7 @@ export const postmortemRoutes: FastifyPluginAsync = async (fastify) => {
       .where(eq(postmortems.incidentId, request.params.id))
       .returning()
 
-    await writeAuditLog(body.authorId ?? 'unknown', 'postmortem.updated', 'incident', request.params.id, before, after, request)
+    await writeAuditLog(request.user.sub, 'postmortem.updated', 'incident', request.params.id, before, after, request)
 
     return after
   })
