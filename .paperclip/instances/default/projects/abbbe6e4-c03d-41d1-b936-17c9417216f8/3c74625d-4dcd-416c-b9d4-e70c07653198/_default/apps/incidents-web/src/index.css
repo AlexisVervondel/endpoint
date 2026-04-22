@@ -107,11 +107,15 @@ label { display: block; margin-bottom: 4px; font-size: 12px; color: var(--text-m
   align-items: center;
   gap: 24px;
   height: 48px;
+  position: sticky;
+  top: 0;
+  z-index: 10;
 }
 
 .nav-brand { font-weight: 700; font-size: 16px; color: var(--text); }
-.nav a { color: var(--text-muted); font-size: 13px; }
-.nav a:hover, .nav a.active { color: var(--text); text-decoration: none; }
+.nav a { color: var(--text-muted); font-size: 13px; height: 48px; display: flex; align-items: center; border-bottom: 2px solid transparent; }
+.nav a:hover { color: var(--text); text-decoration: none; }
+.nav a.active { color: var(--text); text-decoration: none; border-bottom-color: var(--accent); }
 
 .page { max-width: 1100px; margin: 0 auto; padding: 24px 16px; }
 
@@ -146,9 +150,29 @@ tr:hover td { background: var(--surface); }
 .sla-breach { color: var(--sev1); font-weight: 600; }
 
 .stat-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 12px; margin-bottom: 20px; }
-.stat-card { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 14px; }
-.stat-label { font-size: 11px; color: var(--text-muted); margin-bottom: 6px; }
-.stat-value { font-size: 24px; font-weight: 700; }
+.stat-card { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 14px; border-top: 3px solid var(--accent); }
+.stat-label { font-size: 11px; color: var(--text-muted); margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.04em; }
+.stat-value { font-size: 24px; font-weight: 700; tabular-nums; font-variant-numeric: tabular-nums; }
+
+.loading {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--text-muted);
+  padding: 48px;
+  justify-content: center;
+}
+.spinner {
+  width: 18px; height: 18px;
+  border: 2px solid var(--border);
+  border-top-color: var(--accent);
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+.filters { display: flex; gap: 8px; margin-bottom: 16px; flex-wrap: wrap; }
+.filters select { width: auto; }
 
 .modal-overlay {
   position: fixed; inset: 0;

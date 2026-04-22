@@ -1,21 +1,21 @@
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
 :root {
-  --bg: #f9fafb;
-  --surface: #ffffff;
-  --border: #e5e7eb;
-  --text: #111827;
-  --text-muted: #6b7280;
-  --accent: #3b82f6;
-  --accent-hover: #2563eb;
+  --bg: #0f1117;
+  --surface: #1a1d27;
+  --border: #2a2d3d;
+  --text: #e2e8f0;
+  --text-muted: #64748b;
+  --accent: #6366f1;
+  --accent-hover: #4f52e0;
   --danger: #ef4444;
-  --success: #10b981;
-  --warning: #f59e0b;
+  --success: #22c55e;
+  --warning: #eab308;
 
-  --status-pending: #f59e0b;
-  --status-active: #3b82f6;
-  --status-completed: #10b981;
-  --status-cancelled: #6b7280;
+  --status-pending: #eab308;
+  --status-active: #6366f1;
+  --status-completed: #22c55e;
+  --status-cancelled: #64748b;
 }
 
 body {
@@ -43,7 +43,7 @@ button {
 .btn-primary:hover { background: var(--accent-hover); }
 
 .btn-secondary { background: var(--surface); color: var(--text); border: 1px solid var(--border); }
-.btn-secondary:hover { background: #f3f4f6; }
+.btn-secondary:hover { background: var(--border); }
 
 .btn-danger { background: var(--danger); color: #fff; }
 .btn-danger:hover { background: #dc2626; }
@@ -86,8 +86,9 @@ label { display: block; font-size: 12px; color: var(--text-muted); margin-bottom
   box-shadow: 0 1px 3px rgba(0,0,0,0.06);
 }
 .nav-brand { font-weight: 700; font-size: 15px; color: var(--text); margin-right: 8px; }
-.nav a { color: var(--text-muted); font-size: 13px; }
-.nav a.active, .nav a:hover { color: var(--text); }
+.nav a { color: var(--text-muted); font-size: 13px; height: 48px; display: flex; align-items: center; border-bottom: 2px solid transparent; }
+.nav a:hover { color: var(--text); }
+.nav a.active { color: var(--text); border-bottom-color: var(--accent); }
 
 .page { max-width: 1100px; margin: 0 auto; padding: 24px; }
 
@@ -113,7 +114,7 @@ label { display: block; font-size: 12px; color: var(--text-muted); margin-bottom
   color: var(--danger);
   font-size: 13px;
   padding: 8px 12px;
-  background: #fee2e2;
+  background: color-mix(in srgb, var(--danger) 12%, transparent);
   border-radius: 6px;
   margin-bottom: 12px;
 }
@@ -132,7 +133,7 @@ table.table th {
 }
 table.table td { padding: 10px 12px; border-bottom: 1px solid var(--border); }
 table.table tr:last-child td { border-bottom: none; }
-table.table tr:hover td { background: #f9fafb; }
+table.table tr:hover td { background: var(--surface); }
 
 .badge {
   display: inline-block;
@@ -166,9 +167,27 @@ table.table tr:hover td { background: #f9fafb; }
   border: 1px solid var(--border);
   border-radius: 8px;
   padding: 14px 16px;
+  border-top: 3px solid var(--accent);
 }
-.stat-value { font-size: 26px; font-weight: 700; line-height: 1; }
-.stat-label { font-size: 12px; color: var(--text-muted); margin-top: 4px; }
+.stat-value { font-size: 26px; font-weight: 700; line-height: 1; font-variant-numeric: tabular-nums; }
+.stat-label { font-size: 11px; color: var(--text-muted); margin-top: 4px; text-transform: uppercase; letter-spacing: 0.04em; }
+
+.loading {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--text-muted);
+  padding: 48px;
+  justify-content: center;
+}
+.spinner {
+  width: 18px; height: 18px;
+  border: 2px solid var(--border);
+  border-top-color: var(--accent);
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
 
 .detail-grid { display: grid; grid-template-columns: 1fr 300px; gap: 20px; align-items: start; }
 

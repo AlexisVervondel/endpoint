@@ -31,9 +31,8 @@ export function IncidentListPage() {
         <button className="btn-primary" onClick={() => setShowCreate(true)}>Open Incident</button>
       </div>
 
-      <div style={{ display: 'flex', gap: 8, marginBottom: 16 }}>
+      <div className="filters">
         <select
-          style={{ width: 'auto' }}
           value={filter.status}
           onChange={(e) => setFilter((f) => ({ ...f, status: e.target.value }))}
         >
@@ -45,7 +44,6 @@ export function IncidentListPage() {
           <option value="closed">Closed</option>
         </select>
         <select
-          style={{ width: 'auto' }}
           value={filter.severity}
           onChange={(e) => setFilter((f) => ({ ...f, severity: e.target.value }))}
         >
@@ -58,7 +56,7 @@ export function IncidentListPage() {
       </div>
 
       {loading ? (
-        <p style={{ color: 'var(--text-muted)' }}>Loading…</p>
+        <div className="loading"><div className="spinner" />Loading…</div>
       ) : incidents.length === 0 ? (
         <div className="empty">No incidents found</div>
       ) : (

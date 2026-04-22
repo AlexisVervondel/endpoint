@@ -98,8 +98,9 @@ label { display: block; font-size: 12px; color: var(--text-muted); margin-bottom
   z-index: 10;
 }
 .nav-brand { font-weight: 700; font-size: 15px; color: var(--text); margin-right: 8px; }
-.nav a { color: var(--text-muted); font-size: 13px; }
-.nav a.active, .nav a:hover { color: var(--text); }
+.nav a { color: var(--text-muted); font-size: 13px; height: 48px; display: flex; align-items: center; border-bottom: 2px solid transparent; }
+.nav a:hover { color: var(--text); }
+.nav a.active { color: var(--text); border-bottom-color: var(--accent); }
 
 .page { max-width: 1100px; margin: 0 auto; padding: 24px; }
 
@@ -200,9 +201,27 @@ label { display: block; font-size: 12px; color: var(--text-muted); margin-bottom
   border: 1px solid var(--border);
   border-radius: 8px;
   padding: 14px 16px;
+  border-top: 3px solid var(--accent);
 }
-.stat-value { font-size: 28px; font-weight: 700; line-height: 1; }
-.stat-label { font-size: 12px; color: var(--text-muted); margin-top: 4px; }
+.stat-value { font-size: 28px; font-weight: 700; line-height: 1; font-variant-numeric: tabular-nums; }
+.stat-label { font-size: 11px; color: var(--text-muted); margin-top: 4px; text-transform: uppercase; letter-spacing: 0.04em; }
+
+.loading {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--text-muted);
+  padding: 48px;
+  justify-content: center;
+}
+.spinner {
+  width: 18px; height: 18px;
+  border: 2px solid var(--border);
+  border-top-color: var(--accent);
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
 
 .empty { text-align: center; padding: 48px 0; color: var(--text-muted); font-size: 13px; }
 

@@ -14,7 +14,7 @@ export function ReportsPage() {
       .finally(() => setLoading(false))
   }, [])
 
-  if (loading) return <div className="page"><p style={{ color: 'var(--text-muted)' }}>Loading…</p></div>
+  if (loading) return <div className="page"><div className="loading"><div className="spinner" />Loading…</div></div>
 
   return (
     <div className="page">
