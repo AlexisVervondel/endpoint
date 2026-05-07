@@ -1,4 +1,5 @@
 import Database from 'better-sqlite3';
+import { copyFileSync, existsSync } from 'fs';
 import type { Visit, CreateVisitInput } from './types.ts';
 
 const CREATE_TABLE = `
@@ -20,9 +21,18 @@ function nowUtc(): string {
   return new Date().toISOString().replace('T', ' ').slice(0, 19);
 }
 
-export function createDb(path: string) {
-  const db = new Database(path);
+export function createDb(localPath: string, persistPath?: string) {
+  const db = new Database(localPath);
   db.exec(CREATE_TABLE);
+
+  function persist() {
+    if (!persistPath) return;
+    try {
+      copyFileSync(localPath, persistPath);
+    } catch (e) {
+      console.warn(`[db] Sync to ${persistPath} failed: ${(e as any)?.message}`);
+    }
+  }
 
   return {
     createVisit(input: CreateVisitInput): Visit {
@@ -32,7 +42,9 @@ export function createDb(path: string) {
       `);
       const signed_in_at = nowUtc();
       const result = stmt.run({ ...input, person_to_meet: input.person_to_meet ?? null, signed_in_at });
-      return db.prepare('SELECT * FROM visits WHERE id = ?').get(result.lastInsertRowid) as Visit;
+      const visit = db.prepare('SELECT * FROM visits WHERE id = ?').get(result.lastInsertRowid) as Visit;
+      persist();
+      return visit;
     },
 
     signOutVisit(id: number): Visit | null {
@@ -41,7 +53,9 @@ export function createDb(path: string) {
         'UPDATE visits SET signed_out_at = ? WHERE id = ? AND signed_out_at IS NULL'
       ).run(signed_out_at, id);
       if (info.changes === 0) return null;
-      return db.prepare('SELECT * FROM visits WHERE id = ?').get(id) as Visit;
+      const visit = db.prepare('SELECT * FROM visits WHERE id = ?').get(id) as Visit;
+      persist();
+      return visit;
     },
 
     getVisits({ date, active }: { date?: string; active?: boolean } = {}): Visit[] {
@@ -77,10 +91,27 @@ export function createDb(path: string) {
 
     markReminderSent(id: number): void {
       db.prepare('UPDATE visits SET reminder_sent = 1 WHERE id = ?').run(id);
+      persist();
     },
   };
 }
 
 export type Db = ReturnType<typeof createDb>;
 
-export const db = createDb(process.env.DB_PATH ?? 'visitors.db');
+export async function initDb(dbPath: string): Promise<Db> {
+  // Azure Files SMB mounts don't support POSIX byte-range locks (fcntl F_SETLK returns
+  // EACCES), which SQLite requires for exclusive write access. Work around by copying the
+  // database to ephemeral local storage on startup and syncing back after each write.
+  const localPath = '/tmp/visitors-local.db';
+
+  if (existsSync(dbPath)) {
+    console.log(`[db] Restoring ${dbPath} → ${localPath}`);
+    copyFileSync(dbPath, localPath);
+  } else {
+    console.log(`[db] No existing database at ${dbPath}, starting fresh`);
+  }
+
+  const db = createDb(localPath, dbPath);
+  console.log(`[db] Opened ${localPath} (persisting to ${dbPath} on writes)`);
+  return db;
+}
