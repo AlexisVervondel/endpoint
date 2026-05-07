@@ -10,17 +10,24 @@ export interface GraphClient {
 }
 
 export function createGraphClient(): GraphClient {
-  const credential = new ClientSecretCredential(
-    process.env.AZURE_TENANT_ID!,
-    process.env.AZURE_CLIENT_ID!,
-    process.env.AZURE_CLIENT_SECRET!,
-  );
+  let credential: ClientSecretCredential | null = null;
+
+  function getCredential(): ClientSecretCredential {
+    if (!credential) {
+      credential = new ClientSecretCredential(
+        process.env.AZURE_TENANT_ID!,
+        process.env.AZURE_CLIENT_ID!,
+        process.env.AZURE_CLIENT_SECRET!,
+      );
+    }
+    return credential;
+  }
 
   let cache: Employee[] | null = null;
   let cacheTime = 0;
 
   async function getToken(): Promise<string> {
-    const token = await credential.getToken('https://graph.microsoft.com/.default');
+    const token = await getCredential().getToken('https://graph.microsoft.com/.default');
     return token.token;
   }
 
