@@ -32,6 +32,12 @@ export function createVisitRouter(db: Db): Router {
     res.json(visit);
   });
 
+  router.get('/export', (req, res) => {
+    const dateFrom = typeof req.query.date_from === 'string' ? req.query.date_from : new Date().toISOString().slice(0, 10);
+    const dateTo = typeof req.query.date_to === 'string' ? req.query.date_to : dateFrom;
+    res.json(db.getVisitsByRange({ dateFrom, dateTo }));
+  });
+
   router.get('/', (req, res) => {
     const date = typeof req.query.date === 'string' ? req.query.date : undefined;
     const active = req.query.active === 'true';

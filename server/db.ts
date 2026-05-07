@@ -58,6 +58,14 @@ export function createDb(path: string) {
       return db.prepare(query).all(...params) as Visit[];
     },
 
+    getVisitsByRange({ dateFrom, dateTo }: { dateFrom: string; dateTo: string }): Visit[] {
+      return db.prepare(`
+        SELECT * FROM visits
+        WHERE DATE(signed_in_at) >= ? AND DATE(signed_in_at) <= ?
+        ORDER BY signed_in_at ASC
+      `).all(dateFrom, dateTo) as Visit[];
+    },
+
     getOverdueVisits(): Visit[] {
       return db.prepare(`
         SELECT * FROM visits

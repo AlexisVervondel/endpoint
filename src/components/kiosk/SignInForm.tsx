@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useInactivityReset } from '../../hooks/useInactivityReset.ts';
 import type { SignInFormData, Employee, Visit } from '../../types.ts';
 import { VISIT_REASONS } from '../../types.ts';
+import CluePointsLogo from '@/components/ui/CluePointsLogo';
 
 const EMPTY_FORM: SignInFormData = {
   first_name: '',
@@ -86,22 +87,25 @@ export default function SignInForm({ onSignIn }: Props) {
   };
 
   return (
-    <div className="min-h-screen flex flex-col px-6 py-8"
+    <div className="min-h-screen flex flex-col items-center justify-center px-6 py-8"
          style={{ background: 'var(--brand-surface-dark)' }}>
-      <button
-        onClick={() => navigate('/kiosk')}
-        className="mb-6 self-start text-sm flex items-center gap-1"
-        style={{ color: 'var(--brand-primary-light)' }}
-      >
-        ← Back
-      </button>
+      <div className="w-full max-w-lg">
+        <button
+          onClick={() => navigate('/kiosk')}
+          className="mb-6 self-start text-sm flex items-center gap-1"
+          style={{ color: 'var(--brand-primary-light)' }}
+        >
+          ← Back
+        </button>
 
-      <h1 className="text-2xl font-bold text-white mb-1">Register your visit</h1>
-      <p className="text-sm mb-6" style={{ color: 'var(--brand-muted)' }}>
-        All fields are required
-      </p>
+        <CluePointsLogo width="100%" className="mb-8 drop-shadow-lg" />
 
-      <form onSubmit={handleSubmit} className="flex flex-col gap-4 w-full max-w-lg mx-auto">
+        <h1 className="text-2xl font-bold text-white mb-1">Register your visit</h1>
+        <p className="text-sm mb-6" style={{ color: 'var(--brand-muted)' }}>
+          All fields are required
+        </p>
+
+        <form onSubmit={handleSubmit} className="flex flex-col gap-4 w-full">
         <div className="grid grid-cols-2 gap-4">
           <input
             required
@@ -183,7 +187,8 @@ export default function SignInForm({ onSignIn }: Props) {
         >
           {submitting ? 'Registering…' : 'Register →'}
         </button>
-      </form>
+        </form>
+      </div>
     </div>
   );
 }
