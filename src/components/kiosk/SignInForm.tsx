@@ -50,7 +50,7 @@ export default function SignInForm({ onSignIn }: Props) {
   useEffect(() => {
     fetch('/api/employees')
       .then(r => r.json())
-      .then(data => setEmployees(Array.isArray(data) ? data : []))
+      .then(data => setEmployees(Array.isArray(data) ? data.filter(e => e?.displayName && e?.mail) : []))
       .catch(() => {});
   }, []);
 
