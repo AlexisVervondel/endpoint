@@ -54,7 +54,7 @@ function VisitRow({ visit, onSignOut }: { visit: Visit; onSignOut: (id: number) 
 
   return (
     <div
-      className="grid gap-3 px-4 py-3 rounded-xl transition-colors"
+      className="grid gap-4 px-5 py-4 rounded-xl transition-colors"
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
       style={{
@@ -209,23 +209,23 @@ export default function AdminPanel() {
         </div>
       </div>
     )}
-    <div className="min-h-screen flex flex-col items-center px-6 py-8" style={{ background: 'var(--brand-bg)' }}>
+    <div className="min-h-screen flex flex-col items-center px-8 py-10" style={{ background: 'var(--brand-bg)' }}>
       <div className="w-full" style={{ maxWidth: 1100 }}>
 
         {/* Header */}
-        <div className="flex flex-col items-center" style={{ marginBottom: 75 }}>
+        <div className="flex flex-col items-center mb-12">
           <CluePointsLogo width={360} />
         </div>
 
         {/* Stats */}
-        <div className="grid grid-cols-3 gap-4 mb-6">
+        <div className="grid grid-cols-3 gap-4 mb-8">
           {tiles.map(s => {
             const active = tileFilter === s.key;
             return (
               <button
                 key={s.key}
                 onClick={() => handleTileClick(s.key)}
-                className="rounded-xl px-5 py-4 text-center transition-all cursor-pointer"
+                className="rounded-xl px-6 py-5 text-center transition-all cursor-pointer"
                 style={{
                   background: active ? 'var(--brand-surface-dark)' : 'var(--brand-surface)',
                   border: `2px solid ${active ? s.color : 'transparent'}`,
@@ -243,7 +243,7 @@ export default function AdminPanel() {
         </div>
 
         {/* Filters */}
-        <div className="flex gap-3 mb-4 items-center flex-wrap">
+        <div className="flex gap-3 mb-6 items-center flex-wrap">
           <input
             placeholder="Search by name or email…"
             value={search}
@@ -294,7 +294,7 @@ export default function AdminPanel() {
         {/* Table */}
         <div className="overflow-x-auto">
           <div
-            className="grid gap-3 px-4 py-2 mb-2"
+            className="grid gap-4 px-5 py-3 mb-2"
             style={{ gridTemplateColumns: '1fr 1fr 70px 70px 100px 90px', minWidth: 640 }}
           >
             {['Name', 'Reason / Meeting', 'Sign In', 'Sign Out', 'Status', 'Action'].map(h => (
@@ -302,7 +302,7 @@ export default function AdminPanel() {
             ))}
           </div>
 
-          <div className="flex flex-col gap-2" style={{ minWidth: 640 }}>
+          <div className="flex flex-col gap-3" style={{ minWidth: 640 }}>
             {filtered.length === 0 && !loading && (
               <p className="text-center py-12 text-sm" style={{ color: 'var(--brand-muted)' }}>
                 No visitors found for the selected filters.
