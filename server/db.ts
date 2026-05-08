@@ -93,6 +93,12 @@ export function createDb(localPath: string, persistPath?: string) {
       db.prepare('UPDATE visits SET reminder_sent = 1 WHERE id = ?').run(id);
       persist();
     },
+
+    deleteAllVisits(): number {
+      const result = db.prepare('DELETE FROM visits').run();
+      persist();
+      return result.changes;
+    },
   };
 }
 

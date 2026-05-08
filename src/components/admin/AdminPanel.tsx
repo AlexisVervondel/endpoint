@@ -73,6 +73,8 @@ export default function AdminPanel() {
   const [tileFilter, setTileFilter] = useState<TileFilter>(null);
   const [loading, setLoading] = useState(false);
   const [showExport, setShowExport] = useState(false);
+  const [showClearConfirm, setShowClearConfirm] = useState(false);
+  const [clearing, setClearing] = useState(false);
 
   const fetchVisits = useCallback(async () => {
     setLoading(true);
@@ -90,6 +92,17 @@ export default function AdminPanel() {
   async function handleSignOut(id: number) {
     await fetch(`/api/visits/${id}/signout`, { method: 'PATCH' });
     fetchVisits();
+  }
+
+  async function handleClearAll() {
+    setClearing(true);
+    try {
+      await fetch('/api/visits', { method: 'DELETE' });
+      setVisits([]);
+    } finally {
+      setClearing(false);
+      setShowClearConfirm(false);
+    }
   }
 
   function handleTileClick(key: 'inside' | 'total' | 'reminders') {
@@ -121,6 +134,42 @@ export default function AdminPanel() {
   return (
     <>
     {showExport && <ExportModal onClose={() => setShowExport(false)} />}
+    {showClearConfirm && (
+      <div
+        className="fixed inset-0 flex items-center justify-center z-50"
+        style={{ background: 'rgba(0,0,0,0.7)' }}
+      >
+        <div
+          className="rounded-2xl px-8 py-7 flex flex-col gap-4"
+          style={{ background: 'var(--brand-surface)', border: '1px solid var(--brand-border)', maxWidth: 420, width: '100%' }}
+        >
+          <div>
+            <p className="text-base font-semibold text-white mb-1">Clear all visitor records?</p>
+            <p className="text-sm" style={{ color: 'var(--brand-muted)' }}>
+              This will permanently delete every visit from the database. This action cannot be undone.
+            </p>
+          </div>
+          <div className="flex gap-3 justify-end">
+            <button
+              onClick={() => setShowClearConfirm(false)}
+              disabled={clearing}
+              className="px-4 py-2 rounded-lg text-sm font-medium"
+              style={{ background: 'var(--brand-surface)', border: '1px solid var(--brand-border)', color: 'var(--brand-muted)' }}
+            >
+              Cancel
+            </button>
+            <button
+              onClick={handleClearAll}
+              disabled={clearing}
+              className="px-4 py-2 rounded-lg text-sm font-semibold text-white"
+              style={{ background: '#b91c1c', border: '1px solid #b91c1c', opacity: clearing ? 0.6 : 1 }}
+            >
+              {clearing ? 'Clearing…' : 'Yes, clear all'}
+            </button>
+          </div>
+        </div>
+      </div>
+    )}
     <div className="min-h-screen flex flex-col items-center px-6 py-8" style={{ background: 'var(--brand-bg)' }}>
       <div className="w-full" style={{ maxWidth: '75%' }}>
 
@@ -183,6 +232,13 @@ export default function AdminPanel() {
             style={{ background: 'var(--brand-primary)', border: '1px solid var(--brand-primary)' }}
           >
             ↓ Export PDF
+          </button>
+          <button
+            onClick={() => setShowClearConfirm(true)}
+            className="px-4 py-2.5 rounded-xl text-sm font-medium"
+            style={{ background: 'var(--brand-surface)', border: '1px solid #7f1d1d', color: '#f87171' }}
+          >
+            ✕ Clear all
           </button>
         </div>
 

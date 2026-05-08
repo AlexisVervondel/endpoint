@@ -44,5 +44,10 @@ export function createVisitRouter(db: Db): Router {
     res.json(db.getVisits({ date, active }));
   });
 
+  router.delete('/', (_req, res) => {
+    const deleted = db.deleteAllVisits();
+    res.json({ deleted });
+  });
+
   return router;
 }
