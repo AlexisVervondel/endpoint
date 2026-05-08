@@ -50,7 +50,7 @@ export default function SignInForm({ onSignIn }: Props) {
   useEffect(() => {
     fetch('/api/employees')
       .then(r => r.json())
-      .then(setEmployees)
+      .then(data => setEmployees(Array.isArray(data) ? data : []))
       .catch(() => {});
   }, []);
 
@@ -209,19 +209,31 @@ export default function SignInForm({ onSignIn }: Props) {
           {form.reason === 'Meeting' && (
             <div className="flex flex-col gap-1.5">
               <FieldLabel htmlFor="person_to_meet">Person to meet</FieldLabel>
-              <select
-                id="person_to_meet"
-                required
-                value={form.person_to_meet}
-                onChange={e => set('person_to_meet', e.target.value)}
-                className={inputClass}
-                style={inputStyle}
-              >
-                <option value="">Select a person…</option>
-                {employees.map(emp => (
-                  <option key={emp.mail} value={emp.displayName}>{emp.displayName}</option>
-                ))}
-              </select>
+              {employees.length > 0 ? (
+                <select
+                  id="person_to_meet"
+                  required
+                  value={form.person_to_meet}
+                  onChange={e => set('person_to_meet', e.target.value)}
+                  className={inputClass}
+                  style={inputStyle}
+                >
+                  <option value="">Select a person…</option>
+                  {employees.map(emp => (
+                    <option key={emp.mail} value={emp.displayName}>{emp.displayName}</option>
+                  ))}
+                </select>
+              ) : (
+                <input
+                  id="person_to_meet"
+                  required
+                  placeholder="Enter the name of the person you are meeting"
+                  value={form.person_to_meet}
+                  onChange={e => set('person_to_meet', e.target.value)}
+                  className={inputClass}
+                  style={inputStyle}
+                />
+              )}
             </div>
           )}
 
