@@ -3,6 +3,32 @@ import type { Visit } from '../../types.ts';
 import CluePointsLogo from '@/components/ui/CluePointsLogo';
 import ExportModal from './ExportModal';
 
+function RefreshIcon() {
+  return (
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <polyline points="23 4 23 10 17 10" /><polyline points="1 20 1 14 7 14" />
+      <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15" />
+    </svg>
+  );
+}
+
+function DownloadIcon() {
+  return (
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+      <polyline points="7 10 12 15 17 10" /><line x1="12" y1="15" x2="12" y2="3" />
+    </svg>
+  );
+}
+
+function CloseIcon() {
+  return (
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" />
+    </svg>
+  );
+}
+
 function formatTime(isoStr: string): string {
   return new Date(isoStr.replace(' ', 'T') + 'Z')
     .toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', timeZone: 'Europe/Brussels' });
@@ -17,17 +43,23 @@ function isOverdue(visit: Visit): boolean {
 function VisitRow({ visit, onSignOut }: { visit: Visit; onSignOut: (id: number) => void }) {
   const active = !visit.signed_out_at;
   const overdue = isOverdue(visit);
+  const [hovered, setHovered] = useState(false);
 
   const borderColor = overdue ? '#f59e0b' : active ? '#059669' : '#334155';
   const statusColor = overdue ? '#f59e0b' : active ? '#059669' : '#475569';
-  const statusText = overdue ? '⚠ 4h+ inside' : active ? 'Inside' : 'Left';
+  const statusText = overdue ? '4h+ inside' : active ? 'Inside' : 'Left';
+
+  const baseBg = active ? 'var(--brand-surface)' : '#0f172a';
+  const hoverBg = active ? '#16304d' : '#111827';
 
   return (
     <div
-      className="grid gap-3 px-4 py-3 rounded-xl"
+      className="grid gap-3 px-4 py-3 rounded-xl transition-colors"
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
       style={{
         gridTemplateColumns: '1fr 1fr 70px 70px 100px 90px',
-        background: active ? 'var(--brand-surface)' : '#0f172a',
+        background: hovered ? hoverBg : baseBg,
         borderLeft: `3px solid ${borderColor}`,
         opacity: active ? 1 : 0.6,
       }}
@@ -46,7 +78,14 @@ function VisitRow({ visit, onSignOut }: { visit: Visit; onSignOut: (id: number) 
         {visit.signed_out_at ? formatTime(visit.signed_out_at) : '—'}
       </div>
       <div className="self-center flex items-center gap-1.5">
-        <div className="w-2 h-2 rounded-full" style={{ background: statusColor }} />
+        {overdue ? (
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke={statusColor} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+            <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" />
+            <line x1="12" y1="9" x2="12" y2="13" /><line x1="12" y1="17" x2="12.01" y2="17" />
+          </svg>
+        ) : (
+          <div className="w-2 h-2 rounded-full" style={{ background: statusColor }} />
+        )}
         <span className="text-xs" style={{ color: statusColor }}>{statusText}</span>
       </div>
       <div className="self-center">
@@ -171,7 +210,7 @@ export default function AdminPanel() {
       </div>
     )}
     <div className="min-h-screen flex flex-col items-center px-6 py-8" style={{ background: 'var(--brand-bg)' }}>
-      <div className="w-full" style={{ maxWidth: '75%' }}>
+      <div className="w-full" style={{ maxWidth: 1100 }}>
 
         {/* Header */}
         <div className="flex flex-col items-center" style={{ marginBottom: 75 }}>
@@ -221,47 +260,58 @@ export default function AdminPanel() {
           />
           <button
             onClick={fetchVisits}
-            className="px-4 py-2.5 rounded-xl text-sm font-medium"
+            aria-label="Refresh visits"
+            className="px-4 py-2.5 rounded-xl text-sm font-medium flex items-center gap-1.5"
             style={{ background: 'var(--brand-surface)', border: '1px solid var(--brand-border)', color: 'var(--brand-muted)' }}
           >
-            {loading ? '…' : '↻ Refresh'}
+            {loading ? (
+              <span style={{ display: 'inline-block', width: 14, height: 14 }}>…</span>
+            ) : (
+              <RefreshIcon />
+            )}
+            Refresh
           </button>
           <button
             onClick={() => setShowExport(true)}
-            className="px-4 py-2.5 rounded-xl text-sm font-medium text-white"
+            aria-label="Export to PDF"
+            className="px-4 py-2.5 rounded-xl text-sm font-medium text-white flex items-center gap-1.5"
             style={{ background: 'var(--brand-primary)', border: '1px solid var(--brand-primary)' }}
           >
-            ↓ Export PDF
+            <DownloadIcon />
+            Export PDF
           </button>
           <button
             onClick={() => setShowClearConfirm(true)}
-            className="px-4 py-2.5 rounded-xl text-sm font-medium"
+            aria-label="Clear all visitor records"
+            className="px-4 py-2.5 rounded-xl text-sm font-medium flex items-center gap-1.5"
             style={{ background: 'var(--brand-surface)', border: '1px solid #7f1d1d', color: '#f87171' }}
           >
-            ✕ Clear all
+            <CloseIcon />
+            Clear all
           </button>
         </div>
 
-        {/* Table header */}
-        <div
-          className="grid gap-3 px-4 py-2 mb-2"
-          style={{ gridTemplateColumns: '1fr 1fr 70px 70px 100px 90px' }}
-        >
-          {['Name', 'Reason / Meeting', 'Sign In', 'Sign Out', 'Status', 'Action'].map(h => (
-            <span key={h} className="text-xs uppercase tracking-wider" style={{ color: '#475569' }}>{h}</span>
-          ))}
-        </div>
+        {/* Table */}
+        <div className="overflow-x-auto">
+          <div
+            className="grid gap-3 px-4 py-2 mb-2"
+            style={{ gridTemplateColumns: '1fr 1fr 70px 70px 100px 90px', minWidth: 640 }}
+          >
+            {['Name', 'Reason / Meeting', 'Sign In', 'Sign Out', 'Status', 'Action'].map(h => (
+              <span key={h} className="text-xs uppercase tracking-wider" style={{ color: '#475569' }}>{h}</span>
+            ))}
+          </div>
 
-        {/* Rows */}
-        <div className="flex flex-col gap-2">
-          {filtered.length === 0 && !loading && (
-            <p className="text-center py-12 text-sm" style={{ color: 'var(--brand-muted)' }}>
-              No visitors found for the selected filters.
-            </p>
-          )}
-          {filtered.map(v => (
-            <VisitRow key={v.id} visit={v} onSignOut={handleSignOut} />
-          ))}
+          <div className="flex flex-col gap-2" style={{ minWidth: 640 }}>
+            {filtered.length === 0 && !loading && (
+              <p className="text-center py-12 text-sm" style={{ color: 'var(--brand-muted)' }}>
+                No visitors found for the selected filters.
+              </p>
+            )}
+            {filtered.map(v => (
+              <VisitRow key={v.id} visit={v} onSignOut={handleSignOut} />
+            ))}
+          </div>
         </div>
 
       </div>

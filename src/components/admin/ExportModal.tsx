@@ -69,7 +69,16 @@ export default function ExportModal({ onClose }: Props) {
       >
         <div className="flex items-center justify-between mb-5">
           <h2 className="text-base font-semibold text-white">Export to PDF</h2>
-          <button onClick={onClose} className="text-lg" style={{ color: 'var(--brand-muted)' }}>✕</button>
+          <button
+            onClick={onClose}
+            aria-label="Close export modal"
+            className="flex items-center justify-center rounded-lg transition-opacity active:opacity-70"
+            style={{ color: 'var(--brand-muted)', width: 36, height: 36 }}
+          >
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+              <line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" />
+            </svg>
+          </button>
         </div>
 
         {/* Preset selector */}
@@ -128,10 +137,16 @@ export default function ExportModal({ onClose }: Props) {
         <button
           onClick={handleExport}
           disabled={loading}
-          className="w-full py-3 rounded-xl text-sm font-semibold text-white transition-opacity disabled:opacity-50"
+          className="w-full py-3 rounded-xl text-sm font-semibold text-white transition-opacity disabled:opacity-50 flex items-center justify-center gap-2"
           style={{ background: 'var(--brand-primary)' }}
         >
-          {loading ? 'Generating…' : '↓ Download PDF'}
+          {!loading && (
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+              <polyline points="7 10 12 15 17 10" /><line x1="12" y1="15" x2="12" y2="3" />
+            </svg>
+          )}
+          {loading ? 'Generating…' : 'Download PDF'}
         </button>
       </div>
     </div>

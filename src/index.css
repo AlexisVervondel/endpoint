@@ -30,3 +30,57 @@ body {
 #root {
   min-height: 100vh;
 }
+
+/* ─── Interactive defaults ─── */
+
+button,
+[role="button"] {
+  cursor: pointer;
+}
+
+/* ─── Focus ring ─── */
+
+:focus-visible {
+  outline: 2px solid var(--brand-primary-light);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+:focus:not(:focus-visible) {
+  outline: none;
+}
+
+/* Highlight focused inputs with a blue border */
+input:focus,
+select:focus,
+textarea:focus {
+  border-color: var(--brand-primary-light) !important;
+}
+
+/* ─── Select: custom chevron ─── */
+
+select {
+  appearance: none;
+  -webkit-appearance: none;
+  background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%237da9c4' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'/%3e%3c/svg%3e");
+  background-repeat: no-repeat;
+  background-position: right 1rem center;
+  background-size: 1rem;
+  padding-right: 2.5rem !important;
+}
+
+select option {
+  background: #0f1f35;
+  color: #e2e8f0;
+}
+
+/* ─── Remove browser autofill yellow ─── */
+
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus {
+  -webkit-box-shadow: 0 0 0 1000px var(--brand-surface) inset;
+  -webkit-text-fill-color: var(--brand-text);
+  caret-color: var(--brand-text);
+  transition: background-color 9999s ease-in-out 0s;
+}

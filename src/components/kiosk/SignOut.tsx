@@ -3,6 +3,22 @@ import { useNavigate } from 'react-router-dom';
 import { useInactivityReset } from '../../hooks/useInactivityReset.ts';
 import type { Visit } from '../../types.ts';
 
+function BackArrow() {
+  return (
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <path d="M19 12H5M12 19l-7-7 7-7" />
+    </svg>
+  );
+}
+
+function CheckIcon() {
+  return (
+    <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <polyline points="20 6 9 17 4 12" />
+    </svg>
+  );
+}
+
 export default function SignOut() {
   const navigate = useNavigate();
   const [query, setQuery] = useState('');
@@ -11,6 +27,7 @@ export default function SignOut() {
   const [confirming, setConfirming] = useState<Visit | null>(null);
   const [loading, setLoading] = useState(false);
   const [done, setDone] = useState(false);
+  const [signOutError, setSignOutError] = useState<string | null>(null);
 
   useInactivityReset(30_000, () => navigate('/kiosk'));
 
@@ -34,13 +51,14 @@ export default function SignOut() {
 
   async function handleConfirmSignOut(visit: Visit) {
     setLoading(true);
+    setSignOutError(null);
     try {
       const res = await fetch(`/api/visits/${visit.id}/signout`, { method: 'PATCH' });
       if (!res.ok) throw new Error('Sign out failed');
       setDone(true);
       setTimeout(() => navigate('/kiosk'), 3000);
     } catch {
-      alert('Could not sign out. Please ask reception for help.');
+      setSignOutError('Could not sign out. Please ask reception for help.');
     } finally {
       setLoading(false);
     }
@@ -50,9 +68,9 @@ export default function SignOut() {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center text-center px-8"
            style={{ background: 'var(--brand-surface-dark)' }}>
-        <div className="w-20 h-20 rounded-full flex items-center justify-center mb-6"
+        <div className="w-20 h-20 rounded-full flex items-center justify-center mb-6 text-white"
              style={{ background: '#059669' }}>
-          <span className="text-white text-4xl">✓</span>
+          <CheckIcon />
         </div>
         <h1 className="text-2xl font-bold text-white mb-2">Goodbye!</h1>
         <p style={{ color: 'var(--brand-muted)' }}>Your visit has been signed out. Have a safe trip!</p>
@@ -75,14 +93,28 @@ export default function SignOut() {
           <button
             onClick={() => handleConfirmSignOut(confirming)}
             disabled={loading}
-            className="w-full py-5 rounded-2xl text-white font-semibold text-xl disabled:opacity-50"
+            className="w-full py-5 rounded-2xl text-white font-semibold text-xl disabled:opacity-50 transition-opacity"
             style={{ background: 'var(--brand-primary)', minHeight: 72 }}
           >
             {loading ? 'Signing out…' : 'Confirm Sign Out'}
           </button>
+
+          {signOutError && (
+            <p
+              role="alert"
+              className="text-sm px-4 py-3 rounded-xl flex items-center gap-2"
+              style={{ background: '#450a0a', color: '#fca5a5' }}
+            >
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" style={{ flexShrink: 0 }}>
+                <circle cx="12" cy="12" r="10" /><line x1="12" y1="8" x2="12" y2="12" /><line x1="12" y1="16" x2="12.01" y2="16" />
+              </svg>
+              {signOutError}
+            </p>
+          )}
+
           <button
-            onClick={() => setConfirming(null)}
-            className="w-full py-4 rounded-2xl font-medium"
+            onClick={() => { setConfirming(null); setSignOutError(null); }}
+            className="w-full py-4 rounded-2xl font-medium transition-opacity active:opacity-70"
             style={{ color: 'var(--brand-muted)', border: '1px solid var(--brand-border)' }}
           >
             Cancel
@@ -97,10 +129,12 @@ export default function SignOut() {
          style={{ background: 'var(--brand-surface-dark)' }}>
       <button
         onClick={() => navigate('/kiosk')}
-        className="mb-6 self-start text-sm flex items-center gap-1"
+        aria-label="Back to home"
+        className="mb-6 self-start text-sm flex items-center gap-1.5 transition-opacity active:opacity-70"
         style={{ color: 'var(--brand-primary-light)' }}
       >
-        ← Back
+        <BackArrow />
+        Back
       </button>
 
       <h1 className="text-2xl font-bold text-white mb-1">Sign Out</h1>
@@ -108,27 +142,34 @@ export default function SignOut() {
         Search by your name or email address
       </p>
 
-      <form onSubmit={handleSearch} className="flex gap-3 mb-6 w-full max-w-lg">
-        <input
-          required
-          value={query}
-          onChange={e => setQuery(e.target.value)}
-          placeholder="Your name or email…"
-          className="flex-1 px-4 py-4 rounded-xl text-white text-base outline-none"
-          style={{ background: 'var(--brand-surface)', border: '1px solid var(--brand-border)', minHeight: 56 }}
-        />
-        <button
-          type="submit"
-          disabled={loading}
-          className="px-6 py-4 rounded-xl font-semibold text-white disabled:opacity-50"
-          style={{ background: 'var(--brand-primary)', minHeight: 56 }}
-        >
-          Search
-        </button>
+      <form onSubmit={handleSearch} className="flex flex-col gap-1.5 mb-6 w-full max-w-lg">
+        <label htmlFor="search_query" className="text-xs font-medium tracking-wide" style={{ color: 'var(--brand-muted)' }}>
+          Name or email address
+        </label>
+        <div className="flex gap-3">
+          <input
+            id="search_query"
+            required
+            value={query}
+            onChange={e => setQuery(e.target.value)}
+            placeholder="John Smith or john@example.com"
+            autoComplete="name"
+            className="flex-1 px-4 py-4 rounded-xl text-white text-base outline-none border border-solid transition-colors"
+            style={{ background: 'var(--brand-surface)', borderColor: 'var(--brand-border)', minHeight: 56 }}
+          />
+          <button
+            type="submit"
+            disabled={loading}
+            className="px-6 py-4 rounded-xl font-semibold text-white disabled:opacity-50 transition-opacity"
+            style={{ background: 'var(--brand-primary)', minHeight: 56 }}
+          >
+            Search
+          </button>
+        </div>
       </form>
 
       {searched && results.length === 0 && (
-        <p className="text-center mt-8" style={{ color: 'var(--brand-muted)' }}>
+        <p role="alert" className="text-center mt-8" style={{ color: 'var(--brand-muted)' }}>
           No active visit found. Please ask reception for help.
         </p>
       )}

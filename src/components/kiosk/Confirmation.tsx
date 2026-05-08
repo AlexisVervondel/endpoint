@@ -2,6 +2,14 @@ import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import type { Visit } from '../../types.ts';
 
+function CheckIcon() {
+  return (
+    <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <polyline points="20 6 9 17 4 12" />
+    </svg>
+  );
+}
+
 interface Props {
   visit: Visit | null;
 }
@@ -31,9 +39,9 @@ export default function Confirmation({ visit }: Props) {
   return (
     <div className="min-h-screen flex flex-col items-center justify-center px-8 text-center"
          style={{ background: 'var(--brand-surface-dark)' }}>
-      <div className="w-20 h-20 rounded-full flex items-center justify-center mb-6"
+      <div className="w-20 h-20 rounded-full flex items-center justify-center mb-6 text-white"
            style={{ background: '#059669' }}>
-        <span className="text-white text-4xl">✓</span>
+        <CheckIcon />
       </div>
 
       <h1 className="text-3xl font-bold text-white mb-2">
