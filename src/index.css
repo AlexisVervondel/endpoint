@@ -74,6 +74,12 @@ select option {
   color: #e2e8f0;
 }
 
+/* ─── Admin table row hover ─── */
+
+.admin-table tbody tr:hover td {
+  background: rgba(15, 31, 53, 0.6);
+}
+
 /* ─── Remove browser autofill yellow ─── */
 
 input:-webkit-autofill,

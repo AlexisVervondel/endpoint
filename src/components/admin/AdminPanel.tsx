@@ -29,6 +29,15 @@ function CloseIcon() {
   );
 }
 
+function WarningIcon() {
+  return (
+    <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" />
+      <line x1="12" y1="9" x2="12" y2="13" /><line x1="12" y1="17" x2="12.01" y2="17" />
+    </svg>
+  );
+}
+
 function formatTime(isoStr: string): string {
   return new Date(isoStr.replace(' ', 'T') + 'Z')
     .toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', timeZone: 'Europe/Brussels' });
@@ -40,66 +49,108 @@ function isOverdue(visit: Visit): boolean {
   return Date.now() - signedIn > 4 * 60 * 60 * 1000;
 }
 
+function StatusBadge({ visit }: { visit: Visit }) {
+  const active = !visit.signed_out_at;
+  const overdue = isOverdue(visit);
+
+  if (overdue) {
+    return (
+      <span
+        className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold"
+        style={{ background: 'rgba(245,158,11,.12)', color: '#fbbf24' }}
+      >
+        <WarningIcon />
+        4h+ inside
+      </span>
+    );
+  }
+  if (active) {
+    return (
+      <span
+        className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold"
+        style={{ background: 'rgba(5,150,105,.15)', color: '#34d399' }}
+      >
+        <span className="w-1.5 h-1.5 rounded-full" style={{ background: '#059669' }} />
+        Inside
+      </span>
+    );
+  }
+  return (
+    <span
+      className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold"
+      style={{ background: 'rgba(71,85,105,.2)', color: '#94a3b8' }}
+    >
+      Left
+    </span>
+  );
+}
+
 function VisitRow({ visit, onSignOut }: { visit: Visit; onSignOut: (id: number) => void }) {
   const active = !visit.signed_out_at;
   const overdue = isOverdue(visit);
-  const [hovered, setHovered] = useState(false);
 
-  const borderColor = overdue ? '#f59e0b' : active ? '#059669' : '#334155';
-  const statusColor = overdue ? '#f59e0b' : active ? '#059669' : '#475569';
-  const statusText = overdue ? '4h+ inside' : active ? 'Inside' : 'Left';
-
-  const baseBg = active ? 'var(--brand-surface)' : '#0f172a';
-  const hoverBg = active ? '#16304d' : '#111827';
+  const indicatorColor = overdue ? '#f59e0b' : active ? '#059669' : '#334155';
 
   return (
-    <div
-      className="grid gap-4 px-5 py-4 rounded-xl transition-colors"
-      onMouseEnter={() => setHovered(true)}
-      onMouseLeave={() => setHovered(false)}
-      style={{
-        gridTemplateColumns: '1fr 1fr 70px 70px 100px 90px',
-        background: hovered ? hoverBg : baseBg,
-        borderLeft: `3px solid ${borderColor}`,
-        opacity: active ? 1 : 0.6,
-      }}
+    <tr
+      className="group transition-colors"
+      style={{ opacity: active ? 1 : 0.55, borderBottom: '1px solid rgba(29,58,92,.5)' }}
     >
-      <div>
-        <p className="text-sm font-semibold text-white">{visit.first_name} {visit.last_name}</p>
-        <p className="text-xs" style={{ color: 'var(--brand-muted)' }}>{visit.email}</p>
-      </div>
-      <div className="text-sm self-center" style={{ color: 'var(--brand-muted)' }}>
-        {visit.reason}{visit.person_to_meet ? ` · ${visit.person_to_meet}` : ''}
-      </div>
-      <div className="text-sm self-center" style={{ color: 'var(--brand-muted)' }}>
-        {formatTime(visit.signed_in_at)}
-      </div>
-      <div className="text-sm self-center" style={{ color: 'var(--brand-muted)' }}>
-        {visit.signed_out_at ? formatTime(visit.signed_out_at) : '—'}
-      </div>
-      <div className="self-center flex items-center gap-1.5">
-        {overdue ? (
-          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke={statusColor} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-            <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" />
-            <line x1="12" y1="9" x2="12" y2="13" /><line x1="12" y1="17" x2="12.01" y2="17" />
-          </svg>
-        ) : (
-          <div className="w-2 h-2 rounded-full" style={{ background: statusColor }} />
-        )}
-        <span className="text-xs" style={{ color: statusColor }}>{statusText}</span>
-      </div>
-      <div className="self-center">
+      {/* Status indicator bar */}
+      <td style={{ padding: '16px 0 16px 16px', width: 8 }}>
+        <span
+          className="block rounded-sm"
+          style={{ width: 4, height: 36, background: indicatorColor }}
+        />
+      </td>
+
+      {/* Name + email */}
+      <td style={{ padding: '16px 16px' }}>
+        <p className="text-sm font-semibold text-white leading-snug">
+          {visit.first_name} {visit.last_name}
+        </p>
+        <p className="text-xs mt-0.5" style={{ color: 'var(--brand-muted)' }}>{visit.email}</p>
+      </td>
+
+      {/* Reason / meeting */}
+      <td style={{ padding: '16px 16px' }}>
+        <span className="text-sm" style={{ color: 'var(--brand-muted)' }}>
+          {visit.reason}{visit.person_to_meet ? ` · ${visit.person_to_meet}` : ''}
+        </span>
+      </td>
+
+      {/* Sign in */}
+      <td style={{ padding: '16px 16px' }}>
+        <span className="text-sm tabular-nums" style={{ color: 'var(--brand-muted)' }}>
+          {formatTime(visit.signed_in_at)}
+        </span>
+      </td>
+
+      {/* Sign out */}
+      <td style={{ padding: '16px 16px' }}>
+        <span className="text-sm tabular-nums" style={{ color: 'var(--brand-muted)' }}>
+          {visit.signed_out_at ? formatTime(visit.signed_out_at) : '—'}
+        </span>
+      </td>
+
+      {/* Status badge */}
+      <td style={{ padding: '16px 16px' }}>
+        <StatusBadge visit={visit} />
+      </td>
+
+      {/* Action */}
+      <td style={{ padding: '16px 16px' }}>
         {active && (
           <button
             onClick={() => onSignOut(visit.id)}
-            className="px-3 py-1.5 rounded-lg text-xs font-semibold text-white transition-opacity active:opacity-70"
+            className="px-3 py-1.5 rounded-md text-xs font-semibold text-white transition-opacity active:opacity-70"
             style={{ background: 'var(--brand-primary)' }}
           >
             Sign out
           </button>
         )}
-      </div>
-    </div>
+      </td>
+    </tr>
   );
 }
 
@@ -209,6 +260,7 @@ export default function AdminPanel() {
         </div>
       </div>
     )}
+
     <div className="min-h-screen flex flex-col items-center px-8 py-10" style={{ background: 'var(--brand-bg)' }}>
       <div className="w-full" style={{ maxWidth: 1100 }}>
 
@@ -293,25 +345,37 @@ export default function AdminPanel() {
 
         {/* Table */}
         <div className="overflow-x-auto">
-          <div
-            className="grid gap-4 px-5 py-3 mb-2"
-            style={{ gridTemplateColumns: '1fr 1fr 70px 70px 100px 90px', minWidth: 640 }}
+          <table
+            className="admin-table w-full"
+            style={{ borderCollapse: 'separate', borderSpacing: 0, minWidth: 700 }}
           >
-            {['Name', 'Reason / Meeting', 'Sign In', 'Sign Out', 'Status', 'Action'].map(h => (
-              <span key={h} className="text-xs uppercase tracking-wider" style={{ color: '#475569' }}>{h}</span>
-            ))}
-          </div>
-
-          <div className="flex flex-col gap-3" style={{ minWidth: 640 }}>
-            {filtered.length === 0 && !loading && (
-              <p className="text-center py-12 text-sm" style={{ color: 'var(--brand-muted)' }}>
-                No visitors found for the selected filters.
-              </p>
-            )}
-            {filtered.map(v => (
-              <VisitRow key={v.id} visit={v} onSignOut={handleSignOut} />
-            ))}
-          </div>
+            <thead>
+              <tr style={{ borderBottom: '1px solid var(--brand-border)' }}>
+                <th style={{ width: 8, padding: 0 }} />
+                {['Name', 'Reason / Meeting', 'Sign In', 'Sign Out', 'Status', 'Action'].map(h => (
+                  <th
+                    key={h}
+                    className="text-left"
+                    style={{ padding: '10px 16px', fontSize: 11, textTransform: 'uppercase', letterSpacing: '0.06em', color: '#475569', fontWeight: 500 }}
+                  >
+                    {h}
+                  </th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {filtered.length === 0 && !loading && (
+                <tr>
+                  <td colSpan={7} className="text-center py-12 text-sm" style={{ color: 'var(--brand-muted)' }}>
+                    No visitors found for the selected filters.
+                  </td>
+                </tr>
+              )}
+              {filtered.map(v => (
+                <VisitRow key={v.id} visit={v} onSignOut={handleSignOut} />
+              ))}
+            </tbody>
+          </table>
         </div>
 
       </div>
